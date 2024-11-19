@@ -1,4 +1,4 @@
-name: ROS2 CI
+name: test_and_build
 
 on:
   pull_request:
