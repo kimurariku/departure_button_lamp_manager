@@ -1,45 +1,52 @@
-name: build_and_test
-
+name: colcon-build-test
 on:
-  workflow_dispatch:
+  # Run this action whenever a pull request is made
   pull_request:
-    branches:
-      - "main"
+  workflow_dispatch:
+  schedule:
+    - cron: '0 0 * * *'
 
 jobs:
-  test_environment:
-    runs-on: [ubuntu-latest]
+  # Note that we pass each job a different name to distinguish each linter job
+  build:
+    runs-on: ubuntu-latest
     strategy:
-      fail-fast: false
       matrix:
         ros_distribution:
           - humble
+
         include:
-          - docker_image: rostooling/setup-ros-docker:ubuntu-focal-ros-humble-ros-base-latest
+          - docker_image: rostooling/setup-ros-docker:ubuntu-jammy-ros-humble-ros-base-latest
             ros_distribution: humble
-            ros_version: 2
     container:
       image: ${{ matrix.docker_image }}
+
     steps:
-      - name: Checkout
-        uses: actions/checkout@v2
-        with:
-          fetch-depth: 2
-
-      - name: Search packages in this repository
-        id: list_packages
+      - name: Install Dependencies Manually
         run: |
-          echo ::set-output name=package_list::$(colcon list --names-only)
+          sudo apt-get update
+          sudo apt-get install -y libunwind-dev
 
-      - name: Setup ROS environment
-        uses: ros-tooling/setup-ros@v0.2
-        with:
-          required-ros-distributions: ${{ matrix.ros_distribution }}
+      - name: Check out Repository
+        uses: actions/checkout@v3
 
-      - name: build and test
-        uses: ros-tooling/action-ros-ci@v0.2
+      - name: Setup
+        uses: ros-tooling/setup-ros@0.7.0
         with:
-          package-name: ${{ steps.list_packages.outputs.package_list }}
-          target-ros2-distro: ${{ matrix.ros_distribution }}
-          vcs-repo-file-url: build_depends.repos
-          import-token: ${{ secrets.REPO_TOKEN }}
+          required-ros-distributions: humble
+
+      - name: Merge autoware.repos into dependency.repos
+        run: |
+          wget https://raw.githubusercontent.com/autowarefoundation/autoware/refs/heads/main/autoware.repos
+          sed -n '2,$p' autoware.repos >> dependency.repos
+
+      - name: Build
+        uses: ros-tooling/action-ros-ci@0.3.3
+        with:
+          package-name: localization_evaluator_tools
+          target-ros2-distro: humble
+          vcs-repo-file-url: dependency.repos
+          import-token: ${{ secrets.GITHUB_TOKEN }}
+          skip-tests: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
