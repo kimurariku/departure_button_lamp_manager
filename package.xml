@@ -31,6 +31,11 @@
  
   <depend>builtin_interfaces</depend>
 
+  <test_depend>ament_lint_auto</test_depend>
+  <test_depend>autoware_lint_common</test_depend>
+  <test_depend>autoware_state_machine_msgs</test_depend>
+  <test_depend>dio_ros_driver</test_depend>
+
   <export>
     <build_type>ament_cmake</build_type>
   </export>
