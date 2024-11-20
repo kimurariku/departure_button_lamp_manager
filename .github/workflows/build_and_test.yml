@@ -1,4 +1,4 @@
-nname: build-and-test
+name: build-and-test
 
 on:
   push:
@@ -45,4 +45,4 @@ jobs:
         with:
           files: ${{ steps.test.outputs.coverage-report-files }}
           fail_ci_if_error: false
-          verbose: trueame: colcon-build-test
+          verbose: true
