@@ -42,7 +42,8 @@ jobs:
         with:
           rosdistro: ${{ matrix.rosdistro }}
           target-packages: ${{ steps.get-self-packages.outputs.self-packages }}
-          build-depends-repos: ${{ matrix.build-depends-repos }}
+          cmake-build-type: Release
+
 
       - name: Test
         if: ${{ steps.get-self-packages.outputs.self-packages != '' }}
@@ -52,6 +53,16 @@ jobs:
           rosdistro: ${{ matrix.rosdistro }}
           target-packages: ${{ steps.get-self-packages.outputs.self-packages }}
           build-depends-repos: ${{ matrix.build-depends-repos }}
+          build-pre-command: |
+            # Clone dependency repositories
+            mkdir -p dependency_ws
+            vcs import dependency_ws < build-depends.repos
+
+            # Build dependencies
+            colcon build --base-paths dependency_ws --merge-install
+
+            # Set up environment for dependencies
+            source dependency_ws/install/setup.sh
 
       - name: Upload coverage to CodeCov
         if: ${{ steps.test.outputs.coverage-report-files != '' }}

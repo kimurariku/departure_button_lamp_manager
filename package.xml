@@ -19,24 +19,28 @@
   <name>departure_button_lamp_manager</name>
   <version>0.0.0</version>
   <description>The departure_button_lamp_manager package</description>
-  <maintainer email="yuma.nihei@eveautonomy.com">yuma hihei</maintainer>
+  <maintainer email="yuma.nihei@eveautonomy.com">yuma nihei</maintainer>
   <license>Apache Licence 2.0</license>
 
+  <!-- ビルド時に必要な依存関係 -->
   <buildtool_depend>ament_cmake_auto</buildtool_depend>
 
+  <!-- ビルドおよび実行時の依存関係 -->
   <depend>rclcpp</depend>
   <depend>dio_ros_driver</depend>
   <depend>autoware_state_machine_msgs</depend>
   <depend>rclcpp_components</depend>
- 
   <depend>builtin_interfaces</depend>
 
+  <!-- テスト時の依存関係 -->
   <test_depend>ament_lint_auto</test_depend>
   <test_depend>autoware_lint_common</test_depend>
-  <test_depend>autoware_state_machine_msgs</test_depend>
   <test_depend>dio_ros_driver</test_depend>
+  <test_depend>autoware_state_machine_msgs</test_depend>
 
+  <!-- ビルドシステムの指定 -->
   <export>
     <build_type>ament_cmake</build_type>
   </export>
 </package>
+

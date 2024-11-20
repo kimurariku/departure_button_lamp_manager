@@ -1,9 +1,9 @@
 repositories:
-  messages/autoware_state_machine_msgs:
+  autoware_state_machine_msgs:
     type: git
     url: https://github.com/eve-autonomy/autoware_state_machine_msgs.git
     version: main
-  vendor/dio_ros_driver:
+  dio_ros_driver:
     type: git
     url: https://github.com/tier4/dio_ros_driver.git
     version: develop/ros2
