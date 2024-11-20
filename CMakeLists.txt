@@ -51,6 +51,13 @@ if(BUILD_TESTING)
     departure_button_lamp_manager rclcpp::rclcpp)
   ament_target_dependencies(test_departure_button_lamp_manager
     autoware_state_machine_msgs dio_ros_driver)
+  target_include_directories(${PROJECT_NAME}_test PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+    $<INSTALL_INTERFACE:include>
+  )
+  target_link_libraries(${PROJECT_NAME}_test
+    ${PROJECT_NAME}
+  )
 endif()
 
 ament_export_dependencies(
