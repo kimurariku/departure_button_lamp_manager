@@ -1,52 +1,48 @@
-name: colcon-build-test
+nname: build-and-test
+
 on:
-  # Run this action whenever a pull request is made
-  pull_request:
-  workflow_dispatch:
+  push:
   schedule:
-    - cron: '0 0 * * *'
+    - cron: 0 0 * * *
+  workflow_dispatch:
 
 jobs:
-  # Note that we pass each job a different name to distinguish each linter job
-  build:
+  build-and-test:
+    if: ${{ github.event_name != 'push' || github.ref_name == github.event.repository.default_branch }}
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        ros_distribution:
-          - humble
-
-        include:
-          - docker_image: rostooling/setup-ros-docker:ubuntu-jammy-ros-humble-ros-base-latest
-            ros_distribution: humble
-    container:
-      image: ${{ matrix.docker_image }}
-
+    container: ghcr.io/autowarefoundation/autoware-universe:latest
     steps:
-      - name: Install Dependencies Manually
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y libunwind-dev
-
-      - name: Check out Repository
+      - name: Check out repository
         uses: actions/checkout@v3
 
-      - name: Setup
-        uses: ros-tooling/setup-ros@0.7.0
-        with:
-          required-ros-distributions: humble
+      - name: Remove exec_depend
+        uses: autowarefoundation/autoware-github-actions/remove-exec-depend@v1
 
-      - name: Merge autoware.repos into dependency.repos
-        run: |
-          wget https://raw.githubusercontent.com/autowarefoundation/autoware/refs/heads/main/autoware.repos
-          sed -n '2,$p' autoware.repos >> dependency.repos
+      - name: Get self packages
+        id: get-self-packages
+        uses: autowarefoundation/autoware-github-actions/get-self-packages@v1
 
       - name: Build
-        uses: ros-tooling/action-ros-ci@0.3.3
+        if: ${{ steps.get-self-packages.outputs.self-packages != '' }}
+        uses: autowarefoundation/autoware-github-actions/colcon-build@v1
         with:
-          package-name: localization_evaluator_tools
-          target-ros2-distro: humble
-          vcs-repo-file-url: dependency.repos
-          import-token: ${{ secrets.GITHUB_TOKEN }}
-          skip-tests: true
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          rosdistro: humble
+          target-packages: ${{ steps.get-self-packages.outputs.self-packages }}
+          build-depends-repos: build_depends.repos
+
+      - name: Test
+        if: ${{ steps.get-self-packages.outputs.self-packages != '' }}
+        id: test
+        uses: autowarefoundation/autoware-github-actions/colcon-test@v1
+        with:
+          rosdistro: humble
+          target-packages: ${{ steps.get-self-packages.outputs.self-packages }}
+          build-depends-repos: build_depends.repos
+
+      - name: Upload coverage to CodeCov
+        if: ${{ steps.test.outputs.coverage-report-files != '' }}
+        uses: codecov/codecov-action@v3
+        with:
+          files: ${{ steps.test.outputs.coverage-report-files }}
+          fail_ci_if_error: false
+          verbose: trueame: colcon-build-test
