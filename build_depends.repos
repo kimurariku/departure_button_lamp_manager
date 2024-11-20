@@ -1,17 +1,9 @@
 repositories:
-  autoware_auto_msgs:
-    type: git
-    url: https://github.com/tier4/autoware_auto_msgs.git
-    version: tier4/main
-  autoware_common:
-    type: git
-    url: https://github.com/autowarefoundation/autoware_common.git
-    version: main
-  autoware_state_machine_msgs:
+  messages/autoware_state_machine_msgs:
     type: git
     url: https://github.com/eve-autonomy/autoware_state_machine_msgs.git
     version: main
-  dio_ros_driver:
+  vendor/dio_ros_driver:
     type: git
     url: https://github.com/tier4/dio_ros_driver.git
     version: develop/ros2
