@@ -9,7 +9,7 @@ on:
 jobs:
   build-and-test:
     if: ${{ github.event_name != 'push' || github.ref_name == github.event.repository.default_branch }}
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     container: ${{ matrix.container }}
     strategy:
       fail-fast: false
@@ -54,15 +54,9 @@ jobs:
           target-packages: ${{ steps.get-self-packages.outputs.self-packages }}
           build-depends-repos: ${{ matrix.build-depends-repos }}
           build-pre-command: |
-            # Clone dependency repositories
-            mkdir -p dependency_ws
-            vcs import dependency_ws < build-depends.repos
-
-            # Build dependencies
-            colcon build --base-paths dependency_ws --merge-install
-
-            # Set up environment for dependencies
-            source dependency_ws/install/setup.sh
+            cp ./dependency_ws ../
+            rm -r dependency_ws
+            cd ..
 
       - name: Upload coverage to CodeCov
         if: ${{ steps.test.outputs.coverage-report-files != '' }}
